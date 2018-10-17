@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    body { display: flex; flex-direction: row; justify-content: center; align-items: center; width: 100vw; height: 100vh; }
+  </style>
+  <script>
+    function loadImage() {
+      const request = new XMLHttpRequest()
+      request.addEventListener('loadend',() => {
+        const url = JSON.parse(request.response).neko
+        const img = new Image()
+        img.addEventListener('load',() => {
+          const aspect = img.width / img.height
+          if(aspect > screen.width / screen.height && window.orientation === 0) {
+            if (img.width > screen.width) img.style.width = '100%'
+          } else {
+            if (img.height > screen.height) img.style.height = '100%'
+          }
+          const body = document.body
+          while (body.hasChildNodes()) body.removeChild(body.firstChild)
+          body.appendChild(img)
+          console.log({ size: `${img.width}x${img.height}`,  aspect, url })
+        })
+        img.src = url
+        img.addEventListener('click', loadImage)
+      })
+      request.open('GET', 'https://nekos.life/api/lewd/neko', true)
+      request.send()
+    }
+  </script>
+</head>
+<body onload="loadImage()">
+</body>
+</html>
