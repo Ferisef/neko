@@ -1,39 +1,36 @@
-<!doctype html>
-<html>
-<head>
-   <meta name="viewport" content="width=device-width,initial-scale=1" />
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     html, body { margin: 0; padding: 0; }
-    body { width: 100vw; height: 100vh; }
+    body { display: flex; flex-direction: row; justify-content: center; align-items: center; width: 100vw; height: 100vh; }
   </style>
-</head>
-<body>
   <script>
-    const req = new XMLHttpRequest()
-    req.addEventListener('loadend', () => {
-      const url = JSON.parse(req.response).neko
-
-      const img = new Image()
-      img.addEventListener('load', () => {
-        const aspect = img.width / img.height
-        
-        img.style.display ='block'
-        img.style.margin ='0 auto'
-        
-        if (aspect > screen.width / screen.height && window.orientation === 0) {
-          img.style.width = '100%'
-        } else {
-          img.style.height = '100%'
-        }
-        
-        document.body.appendChild(img)
-
-        console.log(`${img.width}x${img.height} aspect:${aspect}`)
+    function loadImage() {
+      const request = new XMLHttpRequest()
+      request.addEventListener('loadend',() => {
+        const url = JSON.parse(request.response).neko
+        const img = new Image()
+        img.addEventListener('load',() => {
+          const aspect = img.width / img.height
+          if(aspect > screen.width / screen.height && window.orientation === 0) {
+            if (img.width > screen.width) img.style.width = '100%'
+          } else {
+            if (img.height > screen.height) img.style.height = '100%'
+          }
+          const body = document.body
+          while (body.hasChildNodes()) body.removeChild(body.firstChild)
+          body.appendChild(img)
+          console.log({ size: `${img.width}x${img.height}`,  aspect, url })
+        })
+        img.src = url
+        img.addEventListener('click', loadImage)
       })
-      img.src = url
-    })
-    req.open('GET', 'https://nekos.life/api/neko', true)
-    req.send()
+      request.open('GET', 'https://nekos.life/api/neko', true)
+      request.send()
+    }
   </script>
+</head>
+<body onload="loadImage()">
 </body>
 </html>
