@@ -13,6 +13,7 @@
 	  .fadeOutEnd { opacity: 0; }
   </style>
   <script>
+    let paused = false
     function loadImage() {
       const request = new XMLHttpRequest()
       request.addEventListener('loadend',() => {
@@ -37,6 +38,7 @@
             img.className = ''
             img.classList.add('fadeOutStart')
             setTimeout(() => {
+              if (paused) return
               img.classList.add('fadeOutEnd')
               setTimeout(loadImage, 500)
             }, 500)
@@ -44,9 +46,12 @@
           console.log({ size: `${img.width}x${img.height}`,  aspect, url })
         })
         img.src = url
-        img.addEventListener('click', loadImage)
+        img.addEventListener('click', () => {
+          paused = !paused
+          if (!paused) loadImage()
+        })
       })
-      request.open('GET', 'https://nekos.life/api/lewd/neko', true)
+      request.open('GET', 'https://nekos.life/api/neko', true)
       request.send()
     }
   </script>
