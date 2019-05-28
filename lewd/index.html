@@ -28,36 +28,38 @@
 <body>
   <img id="image" alt="neko" src>
   <script>
-    function update(image, src) {
-      image.onload = () => {
-        image.style.opacity = 1;
+    (async function () {
+      function update(image, src) {
+        image.onload = () => {
+          image.style.opacity = 1;
+        }
+      
+        image.style.opacity = 0;
+        image.src = src;
       }
-    
-      image.style.opacity = 0;
-      image.src = src;
-    }
 
-    function render(image) {
-      return setInterval(async () => {
-        const res = await fetch('https://nekos.life/api/lewd/neko').then(r => r.json());
-        update(image, res.neko);
-      }, 5000);
-    }
-
-    const image = document.getElementById('image');
-
-    const res = await fetch('https://nekos.life/api/lewd/neko').then(r => r.json());
-    update(image, res.neko);
-
-    let timer = render(image);
-    image.onclick = () => {
-      if (!timer) {
-        timer = render(image);
-        return;
+      function render(image) {
+        return setInterval(async () => {
+          const res = await fetch('https://nekos.life/api/lewd/neko').then(r => r.json());
+          update(image, res.neko);
+        }, 5000);
       }
-      clearInterval(timer);
-      timer = null;
-    }
+
+      const image = document.getElementById('image');
+
+      const res = await fetch('https://nekos.life/api/lewd/neko').then(r => r.json());
+      update(image, res.neko);
+
+      let timer = render(image);
+      image.onclick = () => {
+        if (!timer) {
+          timer = render(image);
+          return;
+        }
+        clearInterval(timer);
+        timer = null;
+      }
+    })();
   </script>
 </body>
 </html>
