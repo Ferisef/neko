@@ -1,65 +1,89 @@
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>neko</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100vw;
-      height: 100vh;
-      margin: 0;
-      padding: 0;
-      background-color: #212121;
-    }
-
-    #image {
-      max-width: 100%;
-      max-height: 100%;
-      opacity: 0;
-      transition: all .5s;
-    }
-  </style>
-</head>
-<body>
-  <img id="image" alt="neko" src>
-  <script>
-    (async function () {
-      function update(image, src) {
-        image.onload = () => {
-          image.style.opacity = 1;
-        }
-      
-        image.style.opacity = 0;
-        image.src = src;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>neko</title>
+    <style>
+      body {
+        margin: 0;
       }
 
-      function render(image) {
-        return setInterval(async () => {
-          const res = await fetch('https://nekos.life/api/neko').then(r => r.json());
-          update(image, res.neko);
-        }, 5000);
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        background-color: #212121;
       }
 
-      const image = document.getElementById('image');
-
-      const res = await fetch('https://nekos.life/api/neko').then(r => r.json());
-      update(image, res.neko);
-
-      let timer = render(image);
-      image.onclick = () => {
-        if (!timer) {
-          timer = render(image);
-          return;
-        }
-        clearInterval(timer);
-        timer = null;
+      #neko {
+        max-width: 100%;
+        max-height: 100%;
+        opacity: 0;
+        transition: opacity 200ms;
       }
-    })();
-  </script>
-</body>
+    </style>
+    <script>
+      ((target) => {
+        const isLewd = location.search.startsWith('?lewd');
+
+        const fetchImage = async () => {
+          const url = `https://nekos.life/api${isLewd ? '/lewd' : ''}/neko`;
+
+          const json = await fetch(url).then((res) => res.json());
+          return json.neko;
+        };
+
+        const setImage = (imageElement, url) => {
+          imageElement.onload = () => {
+            imageElement.style.opacity = 1;
+          };
+
+          imageElement.src = url;
+          imageElement.style.opacity = 0;
+        };
+
+        const update = async (imageElement) => {
+          setImage(imageElement, await fetchImage());
+        };
+
+        const createRenderer = async (imageElement) => {
+          await update(imageElement);
+
+          const handle = setInterval(async () => {
+            await update(imageElement);
+          }, 5000);
+
+          return () => {
+            clearInterval(handle);
+          };
+        };
+
+        const initialize = async () => {
+          target.removeEventListener('DOMContentLoaded', initialize);
+
+          const imageElement = target.querySelector('#neko');
+          let dispose = await createRenderer(imageElement);
+
+          imageElement.addEventListener('click', async () => {
+            if (!dispose) {
+              dispose = await createRenderer(imageElement);
+            } else {
+              dispose();
+              dispose = undefined;
+            }
+          });
+        };
+
+        target.addEventListener('DOMContentLoaded', initialize);
+      })(document);
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <img id="neko" alt="neko" />
+    </div>
+  </body>
 </html>
